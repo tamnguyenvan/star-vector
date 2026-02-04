@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import os
 from omegaconf import OmegaConf
+from accelerate import init_empty_weights
 from starvector.model.image_encoder.clip_model import convert_weights_to_precision
 from starvector.data.util import ImageTrainProcessor
 
@@ -39,13 +40,14 @@ class ImageEncoder(nn.Module):
                 
             from transformers import AutoProcessor, AutoModel
 
-            self.visual_encoder = AutoModel.from_pretrained(
-                model_name, torch_dtype = torch_dtype
-            ).vision_model
-
-            self.processor = AutoProcessor.from_pretrained(
-                model_name, torch_dtype = torch_dtype
-            )
+            with init_empty_weights():
+                self.visual_encoder = AutoModel.from_pretrained(
+                    model_name, torch_dtype = torch_dtype
+                ).vision_model
+    
+                self.processor = AutoProcessor.from_pretrained(
+                    model_name, torch_dtype = torch_dtype
+                )
 
     def build_clip_encoder(self, image_size):
         from starvector.model.image_encoder.clip_model import VisionTransformer, LayerNorm

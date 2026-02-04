@@ -28,7 +28,6 @@ class StarCoderModel(nn.Module):
                 attn_implementation="flash_attention_2", 
                 torch_dtype=torch.bfloat16, 
                 trust_remote_code=True,
-                device_map="cpu"
             )
         model.resize_token_embeddings(len(self.tokenizer))
         self.transformer = model

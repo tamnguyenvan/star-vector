@@ -1,4 +1,5 @@
 import torch.nn as nn
+from accelerate import init_empty_weights
 from transformers import (
     AutoConfig, 
     AutoModelForCausalLM, 
@@ -19,12 +20,14 @@ class StarCoderModel(nn.Module):
         model_config = AutoConfig.from_pretrained(config.starcoder_model_name, trust_remote_code=True)
         model_config.use_cache = config.use_cache
         model_config.use_bfloat16 = True
-        model = AutoModelForCausalLM.from_pretrained(
-            config.starcoder_model_name, 
-            config=model_config, 
-            attn_implementation="flash_attention_2", 
-            torch_dtype=torch.bfloat16, 
-            trust_remote_code=True)
+
+        with init_empty_weights():
+            model = AutoModelForCausalLM.from_pretrained(
+                config.starcoder_model_name, 
+                config=model_config, 
+                attn_implementation="flash_attention_2", 
+                torch_dtype=torch.bfloat16, 
+                trust_remote_code=True)
         model.resize_token_embeddings(len(self.tokenizer))
         self.transformer = model
 
